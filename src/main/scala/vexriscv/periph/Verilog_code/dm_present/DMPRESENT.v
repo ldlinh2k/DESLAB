@@ -9,7 +9,7 @@ module DMPRESENT (
 );
 
 //---------wires, registers----------
-reg	[79:0] kreg;               // key register
+reg	[79:0] kreg;              // key register
 reg  [63:0] dreg;               // data register
 reg  [4:0]  round;              // round counter
 wire [63:0] dat1,dat2,dat3;     // intermediate data

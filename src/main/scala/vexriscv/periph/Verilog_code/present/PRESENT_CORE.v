@@ -1,3 +1,4 @@
+
 module PRESENT_CORE (
         output	reg	[63:0]	odat,   
 		input				iReset_n,
@@ -12,12 +13,12 @@ module PRESENT_CORE (
 wire [63:0]		odreg_en,odreg_de;
 reg [63:0]		idreg;
 reg [79:0]		kdreg;
-reg		chip_enable_en,chip_enable_de;
+reg				chip_enable_en,chip_enable_de;
 reg				load_reg;
-wire		already_en,already_de;
+wire			already_en,already_de;
 
 
-always @(posedge clk or negedge iReset_n)	
+always @(posedge clk)	
 begin
 	if(~iReset_n)
 	begin
@@ -31,11 +32,10 @@ begin
 	else
 	begin
 		if (load)
-		begin 
+		begin
+			odat <= 64'b0;
 			idreg <= idat;
 			kdreg <= key;
-			load_reg <= load;
-			odat <= odat;
 			if(~control)
 			begin
 				chip_enable_en <= 1'b1;
@@ -48,26 +48,26 @@ begin
 			end
 		end
 		else
-		begin
-			load_reg <= 1'b0;
-			idreg <= idreg;
-			kdreg <= kdreg;
-			chip_enable_en <= chip_enable_en;
-			chip_enable_de <= chip_enable_de;
-		end
-		if(chip_enable_en)
-			odat <= odreg_en;
-		else if (chip_enable_de )
+			begin 
+			if (already_de)
+			begin
+				chip_enable_de <=1'b0;
 				odat <= odreg_de;
-		else
-			odat <=odat;
-		if (already_de)
-			chip_enable_de <=1'b0;
-		if (already_en)
-			chip_enable_en <=1'b0;
+			end
+			else if (already_en)
+			begin
+				chip_enable_en <=1'b0;
+				odat <= odreg_en;
+			end
+			else 
+				odat <= odat;
+		end
+		load_reg <= load;
 	end	
 	done <= already_de | already_en;
+	
 end
+
 	PRESENT_ENCRYPT en(odreg_en, idreg, kdreg, load_reg, clk, chip_enable_en,already_en);	
-	PRESENT_DECRYPT de(odreg_de, idreg, kdreg, load_reg, clk, chip_enable_de,already_de);	
+	PRESENT_DECRYPT de(odreg_de, idreg, kdreg, load_reg, clk, chip_enable_de,already_de);
 endmodule 

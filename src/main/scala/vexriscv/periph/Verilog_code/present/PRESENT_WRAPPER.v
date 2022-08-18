@@ -1,15 +1,13 @@
+
 module PRESENT_WRAPPER(
-  
+        output	reg	[31:0]	odat,   
 		input				clk,
 		input				iReset,
-
+        input		[31:0]	idat,   
         input				iChipselect_n,    
         input				iWrite_n,   
         input				iRead_n,    
-		input		[3:0]	iAddress,
-		input		[31:0]	idat,   
-		output	reg	[31:0]	odat 
-
+		input		[3:0]	iAddress
 );
 
 /*Address:
@@ -18,7 +16,6 @@ module PRESENT_WRAPPER(
 	00xx:	iKey:0x1[79:48];0x2[47:16];0x3[15:0];
 	010x:	iDat: 0x4;0x5
 	001x:	oData:0x6;0x7
-	1001:   status
 */
 wire	[63:0]	odreg;
 reg				reset_n;
@@ -27,15 +24,13 @@ reg		[79:0]	iKey;
 reg				load;
 reg				control;
 wire			done;
-wire			iReset_n;
 
-assign iReset_n = ~iReset;
-always@(posedge clk or negedge iReset_n)
+always@(posedge clk or posedge iReset)
 begin
-	if(~iReset_n)
+	if(iReset)
 	begin
 		odat <=32'b0;
-		reset_n <= iReset_n;
+		reset_n <= ~iReset;
 	end
 	else
 	begin
@@ -58,9 +53,9 @@ begin
 					4'd4:	data[31:0]	<= idat;
 				//control encrypt or decrypt
 					4'd8:	control <= idat[0];
-                    default:
-                    begin
-                    end
+					default:
+					begin
+					end
 				endcase
 			end
 			else
@@ -71,9 +66,9 @@ begin
 					case(iAddress[3:0])
 						4'd7:	odat <= odreg[63:32];
 						4'd6:	odat <= odreg[31:0];
-                        default:
-                        begin
-                        end
+						default:
+						begin
+						end
 					endcase	
 				else
 					odat <= odat;

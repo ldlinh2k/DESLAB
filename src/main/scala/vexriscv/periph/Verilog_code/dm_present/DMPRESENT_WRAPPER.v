@@ -21,15 +21,14 @@ reg	[63:0] data;
 reg	[79:0]	iKey;
 reg		load;
 wire		done;
-wire iReset_n;
-assign iReset_n = ~iReset;
 
-always@(posedge clk or negedge iReset_n)
+
+always@(posedge clk or posedge iReset)
 begin
-	if(~iReset_n)
+	if(iReset)
 	begin
 		odat <=32'b0;
-		reset_n <= iReset_n;
+		reset_n <= ~iReset;
 	end
 	else
 	begin
